@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import ActivityCard from '@/components/ActivityCard';
 import ProgressDashboard from '@/components/ProgressDashboard';
 import Timer from '@/components/Timer';
-import { AuthHeader } from '@/components/auth/AuthHeader';
 import { dailyActivities, Activity } from '@/data/activities';
 
 export default function Home() {
@@ -94,11 +93,6 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 p-4 md:p-8" dir="rtl">
       <div className="max-w-6xl mx-auto">
-        {/* Auth Header */}
-        <div className="flex justify-end mb-4">
-          <AuthHeader />
-        </div>
-        
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
