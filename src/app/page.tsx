@@ -1,33 +1,71 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 import ActivityCard from '@/components/ActivityCard';
 import ProgressDashboard from '@/components/ProgressDashboard';
 import Timer from '@/components/Timer';
+import AuthButton from '@/components/AuthButton';
 import { dailyActivities, Activity } from '@/data/activities';
 
 export default function Home() {
+  const { data: session, status } = useSession();
   const [activities, setActivities] = useState<Activity[]>([]);
   const [currentActivity, setCurrentActivity] = useState<Activity | null>(null);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    // Initialize activities from data
+  // Load user progress from database or localStorage
+  const loadProgress = async () => {
     const allActivities = dailyActivities.phases.flatMap(phase => phase.activities);
     
-    // Load saved progress from localStorage
-    const savedProgress = localStorage.getItem('daily-progress');
-    if (savedProgress) {
-      const progress = JSON.parse(savedProgress);
-      const updatedActivities = allActivities.map(activity => ({
-        ...activity,
-        completed: progress[activity.id] || false
-      }));
-      setActivities(updatedActivities);
+    if (session?.user) {
+      // Authenticated user - load from database
+      try {
+        setIsLoading(true);
+        const response = await fetch('/api/progress');
+        if (response.ok) {
+          const { progress } = await response.json();
+          const progressMap = progress.reduce((acc: Record<string, boolean>, item: any) => {
+            acc[item.activityId] = item.completed;
+            return acc;
+          }, {});
+          
+          const updatedActivities = allActivities.map(activity => ({
+            ...activity,
+            completed: progressMap[activity.id] || false
+          }));
+          setActivities(updatedActivities);
+        }
+      } catch (error) {
+        console.error('Error loading progress:', error);
+        setActivities(allActivities);
+      } finally {
+        setIsLoading(false);
+      }
     } else {
-      setActivities(allActivities);
+      // Guest user - load from localStorage
+      const savedProgress = localStorage.getItem('daily-progress');
+      if (savedProgress) {
+        const progress = JSON.parse(savedProgress);
+        const updatedActivities = allActivities.map(activity => ({
+          ...activity,
+          completed: progress[activity.id] || false
+        }));
+        setActivities(updatedActivities);
+      } else {
+        setActivities(allActivities);
+      }
     }
+  };
 
+  useEffect(() => {
+    if (status !== 'loading') {
+      loadProgress();
+    }
+  }, [session, status]);
+
+  useEffect(() => {
     // Update current time every minute
     const timer = setInterval(() => {
       setCurrentTime(new Date());
@@ -55,22 +93,63 @@ export default function Home() {
     setCurrentActivity(current || null);
   }, [currentTime, activities]);
 
-  const handleToggleComplete = (activityId: string) => {
+  const handleToggleComplete = async (activityId: string) => {
+    const activityToUpdate = activities.find(a => a.id === activityId);
+    if (!activityToUpdate) return;
+    
+    const newCompleted = !activityToUpdate.completed;
+    
+    // Optimistic update
     const updatedActivities = activities.map(activity => 
       activity.id === activityId 
-        ? { ...activity, completed: !activity.completed }
+        ? { ...activity, completed: newCompleted }
         : activity
     );
-    
     setActivities(updatedActivities);
     
-    // Save progress to localStorage
-    const progress = updatedActivities.reduce((acc, activity) => {
-      acc[activity.id] = activity.completed;
-      return acc;
-    }, {} as Record<string, boolean>);
-    
-    localStorage.setItem('daily-progress', JSON.stringify(progress));
+    if (session?.user) {
+      // Authenticated user - save to database
+      try {
+        const response = await fetch('/api/progress', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            activityId,
+            completed: newCompleted,
+          }),
+        });
+        
+        if (!response.ok) {
+          // Revert optimistic update on error
+          const revertedActivities = activities.map(activity => 
+            activity.id === activityId 
+              ? { ...activity, completed: !newCompleted }
+              : activity
+          );
+          setActivities(revertedActivities);
+          console.error('Failed to update progress in database');
+        }
+      } catch (error) {
+        // Revert optimistic update on error
+        const revertedActivities = activities.map(activity => 
+          activity.id === activityId 
+            ? { ...activity, completed: !newCompleted }
+            : activity
+        );
+        setActivities(revertedActivities);
+        console.error('Error updating progress:', error);
+      }
+    } else {
+      // Guest user - save to localStorage
+      const progress = updatedActivities.reduce((acc, activity) => {
+        acc[activity.id] = activity.completed;
+        return acc;
+      }, {} as Record<string, boolean>);
+      
+      localStorage.setItem('daily-progress', JSON.stringify(progress));
+    }
   };
 
   const resetProgress = () => {
@@ -105,7 +184,10 @@ export default function Home() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Progress and Timer */}
           <div className="lg:col-span-1">
-            <ProgressDashboard activities={activities} />
+            <AuthButton />
+            <div className="mt-6">
+              <ProgressDashboard activities={activities} />
+            </div>
             <Timer 
               activityId={currentActivity?.id}
               activityName={currentActivity?.title}
