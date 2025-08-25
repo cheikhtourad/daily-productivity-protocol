@@ -23,10 +23,10 @@ export default function ActivityCard({ activity, onToggleComplete }: ActivityCar
         <div className="flex items-center gap-3 flex-1">
           <span className="text-2xl">{categoryIcons[activity.category]}</span>
           <div className="flex-1">
-            <h3 className={`font-bold text-lg mb-1 ${activity.completed ? 'line-through' : ''}`}>
+            <h3 className={`font-bold text-lg mb-1 text-black ${activity.completed ? 'line-through' : ''}`}>
               {(activity.title as unknown as Record<string, string>)[language] || activity.title}
             </h3>
-            <p className="text-sm font-medium text-gray-600">
+            <p className="text-sm font-medium text-black">
               {activity.timeSlot}
             </p>
           </div>
@@ -59,10 +59,10 @@ export default function ActivityCard({ activity, onToggleComplete }: ActivityCar
         <div className="mt-4 space-y-4 border-t pt-4">
           {/* Processus */}
           <div>
-            <h4 className="font-semibold text-md mb-2" style={{ textAlign: dir === 'rtl' ? 'right' : 'left' }}>📋 {t('activity.process')}</h4>
+            <h4 className="font-semibold text-md mb-2 text-black" style={{ textAlign: dir === 'rtl' ? 'right' : 'left' }}>📋 {t('activity.process')}</h4>
             <ol className="space-y-2" style={{ textAlign: dir === 'rtl' ? 'right' : 'left' }} dir={dir}>
               {((activity.processus as unknown as Record<string, string[]>)[language] || activity.processus).map((step: string, index: number) => (
-                <li key={index} className={`flex items-start gap-2 text-sm ${dir === 'rtl' ? 'flex-row-reverse' : ''}`}>
+                <li key={index} className={`flex items-start gap-2 text-sm text-black ${dir === 'rtl' ? 'flex-row-reverse' : ''}`}>
                   <span className="bg-blue-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs flex-shrink-0 mt-0.5">
                     {index + 1}
                   </span>
@@ -74,12 +74,12 @@ export default function ActivityCard({ activity, onToggleComplete }: ActivityCar
 
           {/* Methodology */}
           <div>
-            <h4 className="font-semibold text-md mb-2" style={{ textAlign: dir === 'rtl' ? 'right' : 'left' }}>⚡ {t('activity.methodology')}</h4>
+            <h4 className="font-semibold text-md mb-2 text-black" style={{ textAlign: dir === 'rtl' ? 'right' : 'left' }}>⚡ {t('activity.methodology')}</h4>
             <div className="bg-white/70 p-3 rounded-md">
-              <p className="font-medium text-sm text-blue-800 mb-1" style={{ textAlign: dir === 'rtl' ? 'right' : 'left' }} dir={dir}>
+              <p className="font-medium text-sm text-black mb-1" style={{ textAlign: dir === 'rtl' ? 'right' : 'left' }} dir={dir}>
                 {(activity.methodology.name as unknown as Record<string, string>)[language] || activity.methodology.name}
               </p>
-              <p className="text-sm text-gray-700" style={{ textAlign: dir === 'rtl' ? 'right' : 'left' }} dir={dir}>
+              <p className="text-sm text-black" style={{ textAlign: dir === 'rtl' ? 'right' : 'left' }} dir={dir}>
                 {(activity.methodology.description as unknown as Record<string, string>)[language] || activity.methodology.description}
               </p>
             </div>
