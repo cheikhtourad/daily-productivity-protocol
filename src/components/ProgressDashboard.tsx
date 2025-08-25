@@ -2,12 +2,14 @@
 
 import React from 'react';
 import { Activity, categoryIcons } from '@/data/activities';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface ProgressDashboardProps {
   activities: Activity[];
 }
 
 export default function ProgressDashboard({ activities }: ProgressDashboardProps) {
+  const { t } = useLanguage();
   const totalActivities = activities.length;
   const completedActivities = activities.filter(a => a.completed).length;
   const progressPercentage = Math.round((completedActivities / totalActivities) * 100);
@@ -24,27 +26,31 @@ export default function ProgressDashboard({ activities }: ProgressDashboardProps
     return stats;
   }, {} as Record<string, { total: number; completed: number }>);
 
-  const getCategoryName = (category: string) => {
-    const names = {
-      spiritual: 'روحية',
-      work: 'عمل',
-      personal: 'شخصية',
-      family: 'أسرة'
-    };
-    return names[category as keyof typeof names] || category;
+  const getCategoryKey = (category: string) => {
+    const categoryMap: { [key: string]: string } = {
+      'spiritual': 'category.spiritual',
+      'work': 'category.work',
+      'health': 'category.health', 
+      'education': 'category.education',
+      'family': 'category.family',
+      'hobbies': 'category.hobbies',
+      'personal': 'category.personal',
+      'other': 'category.other'
+    }
+    return categoryMap[category] || `category.${category}`
   };
 
   return (
     <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-      <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">
-        📊 لوحة التقدم اليومي
+      <h2 className="text-2xl font-bold text-center mb-6 text-high-contrast">
+        📊 {t('progress.daily_progress_dashboard')}
       </h2>
       
       {/* Overall Progress */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-lg font-semibold">التقدم العام</span>
-          <span className="text-lg font-bold text-blue-600">
+          <span className="text-lg font-semibold text-secondary">{t('progress.overall_progress')}</span>
+          <span className="text-lg font-bold text-accent">
             {completedActivities}/{totalActivities} ({progressPercentage}%)
           </span>
         </div>
@@ -65,13 +71,13 @@ export default function ProgressDashboard({ activities }: ProgressDashboardProps
               <div className="text-3xl mb-2">
                 {categoryIcons[category as keyof typeof categoryIcons]}
               </div>
-              <div className="text-sm font-medium text-gray-700 mb-1">
-                {getCategoryName(category)}
+              <div className="text-sm font-medium text-secondary mb-1">
+                {t(getCategoryKey(category))}
               </div>
-              <div className="text-lg font-bold text-gray-800">
+              <div className="text-lg font-bold text-medium-contrast">
                 {stats.completed}/{stats.total}
               </div>
-              <div className="text-sm text-blue-600">
+              <div className="text-sm text-accent">
                 {percentage}%
               </div>
             </div>
@@ -82,23 +88,23 @@ export default function ProgressDashboard({ activities }: ProgressDashboardProps
       {/* Motivation Message */}
       <div className="mt-6 text-center">
         {progressPercentage === 100 && (
-          <div className="text-green-600 font-bold text-lg">
-            🎉 مبروك! تمام إنجاز جميع الأنشطة اليوم
+          <div className="text-success font-bold text-lg">
+            🎉 {t('progress.congratulations_complete')}
           </div>
         )}
         {progressPercentage >= 80 && progressPercentage < 100 && (
-          <div className="text-blue-600 font-medium">
-            💪 أداء ممتاز! أكمل المتبقي لإنجاز مثالي
+          <div className="text-info font-medium">
+            💪 {t('progress.excellent_performance')}
           </div>
         )}
         {progressPercentage >= 50 && progressPercentage < 80 && (
-          <div className="text-orange-600 font-medium">
-            ⚡ في منتصف الطريق! استمر بنفس القوة
+          <div className="text-warning font-medium">
+            ⚡ {t('progress.halfway_there')}
           </div>
         )}
         {progressPercentage < 50 && (
-          <div className="text-gray-600 font-medium">
-            🚀 البداية القوية مفتاح النجاح!
+          <div className="text-secondary font-medium">
+            🚀 {t('progress.strong_start')}
           </div>
         )}
       </div>

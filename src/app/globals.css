@@ -3,8 +3,18 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #1a202c;
   --font-arabic: 'Noto Sans Arabic', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  
+  /* Enhanced text colors for better readability */
+  --text-primary: #1a202c;
+  --text-secondary: #4a5568;
+  --text-muted: #718096;
+  --text-accent: #2b6cb0;
+  --text-success: #38a169;
+  --text-warning: #d69e2e;
+  --text-error: #e53e3e;
+  --text-info: #3182ce;
 }
 
 @theme inline {
@@ -74,4 +84,53 @@ body {
 
 .card-shadow:hover {
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* Enhanced text utility classes */
+.text-primary {
+  color: var(--text-primary);
+}
+
+.text-secondary {
+  color: var(--text-secondary);
+}
+
+.text-muted {
+  color: var(--text-muted);
+}
+
+.text-accent {
+  color: var(--text-accent);
+}
+
+.text-success {
+  color: var(--text-success);
+}
+
+.text-warning {
+  color: var(--text-warning);
+}
+
+.text-error {
+  color: var(--text-error);
+}
+
+.text-info {
+  color: var(--text-info);
+}
+
+/* Improved contrast for better readability */
+.text-high-contrast {
+  color: #0d1117;
+  font-weight: 600;
+}
+
+.text-medium-contrast {
+  color: #24292f;
+  font-weight: 500;
+}
+
+.text-low-contrast {
+  color: #656d76;
+  font-weight: 400;
 }

@@ -20,9 +20,9 @@ export default function UserHeader() {
           </span>
         </div>
         <div>
-          <h3 className="font-medium text-gray-800">{t('auth.welcome')}, {user.username}</h3>
+          <h3 className="font-medium text-high-contrast">{t('auth.welcome')}, {user.username}</h3>
           {user.email && (
-            <p className="text-sm text-gray-500">{user.email}</p>
+            <p className="text-sm text-muted">{user.email}</p>
           )}
         </div>
       </div>
@@ -31,7 +31,7 @@ export default function UserHeader() {
         <LanguageSelector />
         <button
           onClick={logout}
-          className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+          className="px-4 py-2 text-sm text-secondary hover:text-primary hover:bg-gray-100 rounded-lg transition-colors"
         >
           {t('auth.logout')}
         </button>

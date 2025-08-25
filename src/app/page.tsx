@@ -8,30 +8,36 @@ import AuthForm from '@/components/AuthForm';
 import UserHeader from '@/components/UserHeader';
 import TaskForm from '@/components/TaskForm';
 import CustomTaskCard from '@/components/CustomTaskCard';
+import BulkTaskImport from '@/components/BulkTaskImport';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTasks, CustomTask } from '@/contexts/TasksContext';
-import { dailyActivities, Activity } from '@/data/activities';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { Activity } from '@/data/activities';
+import { getLocalizedActivities } from '@/data/activitiesMultilang';
 
 export default function Home() {
   const { user, isLoading } = useAuth();
   const { customTasks, toggleTaskComplete, deleteTask } = useTasks();
+  const { t, dir, language } = useLanguage();
   const [activities, setActivities] = useState<Activity[]>([]);
   const [currentActivity, setCurrentActivity] = useState<Activity | null>(null);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [showTaskForm, setShowTaskForm] = useState(false);
+  const [showBulkImport, setShowBulkImport] = useState(false);
   const [editingTask, setEditingTask] = useState<CustomTask | null>(null);
   const [activeTab, setActiveTab] = useState<'daily' | 'custom'>('daily');
 
   // Load user progress from localStorage
   const loadProgress = useCallback(() => {
-    const allActivities = dailyActivities.phases.flatMap(phase => phase.activities);
+    const localizedData = getLocalizedActivities(language);
+    const allActivities = localizedData.phases.flatMap((phase: { activities: Activity[] }) => phase.activities);
     
     if (user) {
       // Authenticated user - load user-specific progress
       const savedProgress = localStorage.getItem(`daily-progress-${user.username}`);
       if (savedProgress) {
         const progress = JSON.parse(savedProgress);
-        const updatedActivities = allActivities.map(activity => ({
+        const updatedActivities = allActivities.map((activity: Activity) => ({
           ...activity,
           completed: progress[activity.id] || false
         }));
@@ -42,13 +48,13 @@ export default function Home() {
     } else {
       setActivities(allActivities);
     }
-  }, [user]);
+  }, [user, language]);
 
   useEffect(() => {
     if (!isLoading) {
       loadProgress();
     }
-  }, [user, isLoading, loadProgress]);
+  }, [user, isLoading, loadProgress, language]);
 
   useEffect(() => {
     // Update current time every minute
@@ -117,7 +123,7 @@ export default function Home() {
   };
 
   const handleDeleteTask = (taskId: string) => {
-    if (confirm('هل أنت متأكد من حذف هذه المهمة؟')) {
+    if (confirm(t('tasks.confirm_delete'))) {
       deleteTask(taskId);
     }
   };
@@ -132,7 +138,7 @@ export default function Home() {
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">جاري التحميل...</p>
+          <p className="text-gray-600">{t('loading')}</p>
         </div>
       </div>
     );
@@ -143,23 +149,23 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 p-4 md:p-8" dir="rtl">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 p-4 md:p-8" dir={dir}>
       <div className="max-w-6xl mx-auto">
         {/* User Header */}
         <UserHeader />
         
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
-            📋 البروتوكول اليومي – المنهجية العملية
+          <h1 className="text-4xl md:text-5xl font-bold text-high-contrast mb-4">
+            📋 {t('app.title')} – {t('app.description')}
           </h1>
-          <p className="text-lg text-gray-600 mb-4">
-            الوقت الحالي: <span className="font-mono font-bold">{currentTime.toLocaleTimeString('ar-SA')}</span>
+          <p className="text-lg text-secondary mb-4">
+            {t('time.current')}: <span className="font-mono font-bold text-accent">{currentTime.toLocaleTimeString(language === 'ar' ? 'ar-SA' : language === 'fr' ? 'fr-FR' : 'en-US')}</span>
           </p>
           {currentActivity && (
             <div className="bg-yellow-100 border-yellow-300 border-2 rounded-lg p-3 inline-block">
               <p className="text-yellow-800 font-medium">
-                🔔 النشاط الحالي: <span className="font-bold">{currentActivity.title}</span>
+                🔔 {t('activity.current')}: <span className="font-bold">{currentActivity.title}</span>
               </p>
               <p className="text-sm text-yellow-700">
                 {currentActivity.timeSlot}
@@ -178,7 +184,7 @@ export default function Home() {
                     : 'text-gray-600 hover:text-blue-600'
                 }`}
               >
-                الأنشطة اليومية
+                {t('tabs.daily_activities')}
               </button>
               <button
                 onClick={() => setActiveTab('custom')}
@@ -188,7 +194,7 @@ export default function Home() {
                     : 'text-gray-600 hover:text-blue-600'
                 }`}
               >
-                المهام المخصصة ({customTasks.length})
+                {t('tabs.custom_tasks')} ({customTasks.length})
               </button>
             </div>
           </div>
@@ -209,10 +215,10 @@ export default function Home() {
                 onClick={resetProgress}
                 className="px-6 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors"
               >
-                🔄 إعادة تعيين التقدم
+                🔄 {t('progress.reset')}
               </button>
               <p className="text-xs text-gray-500 mt-2">
-                هذا سيمحو كل التقدم المحفوظ
+                {t('progress.reset_warning')}
               </p>
             </div>
           </div>
@@ -221,18 +227,18 @@ export default function Home() {
           <div className="lg:col-span-2">
             {activeTab === 'daily' ? (
               /* Daily Activities */
-              dailyActivities.phases.map((phase, phaseIndex) => (
+              getLocalizedActivities(language).phases.map((phase: { title: string; timeRange: string; activities: Activity[] }, phaseIndex: number) => (
                 <div key={phaseIndex} className="mb-8">
                   <div className="bg-white rounded-xl shadow-lg p-6">
-                    <h2 className="text-2xl font-bold text-gray-800 mb-2 text-center">
+                    <h2 className="text-2xl font-bold text-high-contrast mb-2 text-center">
                       {phase.title}
                     </h2>
-                    <p className="text-lg text-gray-600 mb-6 text-center font-mono">
+                    <p className="text-lg text-secondary mb-6 text-center font-mono">
                       {phase.timeRange}
                     </p>
                     
                     <div className="space-y-4">
-                      {phase.activities.map(activity => {
+                      {phase.activities.map((activity: Activity) => {
                         const activityWithProgress = activities.find(a => a.id === activity.id) || activity;
                         return (
                           <ActivityCard
@@ -251,22 +257,31 @@ export default function Home() {
               <div className="mb-8">
                 <div className="bg-white rounded-xl shadow-lg p-6">
                   <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-2xl font-bold text-gray-800">
-                      المهام المخصصة
+                    <h2 className="text-2xl font-bold text-high-contrast">
+                      {t('tabs.custom_tasks')}
                     </h2>
-                    <button
-                      onClick={() => setShowTaskForm(true)}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
-                    >
-                      <span>➕</span>
-                      <span>إضافة مهمة</span>
-                    </button>
+                    <div className="flex space-x-3">
+                      <button
+                        onClick={() => setShowBulkImport(true)}
+                        className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center space-x-2"
+                      >
+                        <span>📥</span>
+                        <span>{t('import.bulk_task_import')}</span>
+                      </button>
+                      <button
+                        onClick={() => setShowTaskForm(true)}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
+                      >
+                        <span>➕</span>
+                        <span>{t('tasks.add')}</span>
+                      </button>
+                    </div>
                   </div>
                   
                   {customTasks.length === 0 ? (
                     <div className="text-center py-8 text-gray-500">
-                      <p className="text-lg mb-2">🗂️ لا توجد مهام مخصصة بعد</p>
-                      <p className="text-sm">أضف مهمة جديدة لتبدأ في تنظيم يومك</p>
+                      <p className="text-lg mb-2">🗂️ {t('tasks.empty')}</p>
+                      <p className="text-sm">{t('tasks.empty_subtitle')}</p>
                     </div>
                   ) : (
                     <div className="space-y-4">
@@ -290,9 +305,9 @@ export default function Home() {
         </div>
 
         {/* Footer */}
-        <div className="text-center mt-8 text-gray-600">
+        <div className="text-center mt-8 text-muted">
           <p className="text-sm">
-            💡 تطبيق البروتوكول اليومي - نظام إنتاجية شامل مع منهجيات علمية مثبتة
+            💡 {t('app.footer')}
           </p>
         </div>
         
@@ -301,6 +316,12 @@ export default function Home() {
           isOpen={showTaskForm}
           onClose={handleCloseTaskForm}
           editingTask={editingTask}
+        />
+        
+        {/* Bulk Import Modal */}
+        <BulkTaskImport
+          isOpen={showBulkImport}
+          onClose={() => setShowBulkImport(false)}
         />
       </div>
     </div>

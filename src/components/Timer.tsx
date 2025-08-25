@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface TimerProps {
   activityId?: string;
@@ -8,6 +9,7 @@ interface TimerProps {
 }
 
 export default function Timer({ activityName }: TimerProps) {
+  const { t, dir } = useLanguage();
   const [minutes, setMinutes] = useState(25);
   const [seconds, setSeconds] = useState(0);
   const [isActive, setIsActive] = useState(false);
@@ -43,8 +45,8 @@ export default function Timer({ activityName }: TimerProps) {
           
           // Play notification sound or show notification
           if ('Notification' in window && Notification.permission === 'granted') {
-            new Notification(isBreak ? 'استراحة انتهت!' : 'جلسة عمل انتهت!', {
-              body: isBreak ? 'وقت العودة للعمل' : 'وقت الاستراحة',
+            new Notification(isBreak ? t('timer.break_ended') : t('timer.work_session_ended'), {
+              body: isBreak ? t('timer.back_to_work') : t('timer.break_time'),
               icon: '/favicon.ico'
             });
           }
@@ -61,7 +63,7 @@ export default function Timer({ activityName }: TimerProps) {
         clearInterval(intervalRef.current);
       }
     };
-  }, [isActive, minutes, seconds, isBreak]);
+  }, [isActive, minutes, seconds, isBreak, t]);
 
   const toggleTimer = () => {
     setIsActive(!isActive);
@@ -93,12 +95,12 @@ export default function Timer({ activityName }: TimerProps) {
   return (
     <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
       <h3 className="text-xl font-bold text-center mb-4 text-gray-800">
-        ⏰ مؤقت بوموردو
+        ⏰ {t('timer.pomodoro_timer')}
       </h3>
       
       {activityName && (
-        <p className="text-center text-gray-600 mb-4 text-sm">
-          النشاط الحالي: <span className="font-medium">{activityName}</span>
+        <p className="text-center text-gray-600 mb-4 text-sm" dir={dir}>
+          {t('timer.current_activity')}: <span className="font-medium">{activityName}</span>
         </p>
       )}
       
@@ -115,7 +117,7 @@ export default function Timer({ activityName }: TimerProps) {
               ? 'bg-green-100 text-green-800' 
               : 'bg-blue-100 text-blue-800'
           }`}>
-            {isBreak ? '🌿 استراحة' : '💼 عمل'}
+            {isBreak ? `🌿 ${t('timer.break')}` : `💼 ${t('timer.work')}`}
           </span>
         </div>
         
@@ -128,14 +130,14 @@ export default function Timer({ activityName }: TimerProps) {
                 : 'bg-green-500 hover:bg-green-600 text-white'
             }`}
           >
-            {isActive ? '⏸️ توقف' : '▶️ ابدأ'}
+            {isActive ? `⏸️ ${t('timer.pause')}` : `▶️ ${t('timer.start')}`}
           </button>
           
           <button
             onClick={resetTimer}
             className="px-6 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg font-medium transition-colors"
           >
-            🔄 إعادة تعيين
+            🔄 {t('timer.reset')}
           </button>
           
           {!isBreak && !isActive && (
@@ -143,15 +145,15 @@ export default function Timer({ activityName }: TimerProps) {
               onClick={startBreak}
               className="px-6 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-medium transition-colors"
             >
-              ☕ استراحة
+              ☕ {t('timer.break')}
             </button>
           )}
         </div>
         
-        <div className="text-sm text-gray-600">
-          <p>الدورات المكتملة: <span className="font-medium">{cycles}</span></p>
+        <div className="text-sm text-gray-600" dir={dir}>
+          <p>{t('timer.completed_cycles')}: <span className="font-medium">{cycles}</span></p>
           <p className="mt-1 text-xs">
-            25 دقيقة عمل • 5 دقائق استراحة
+            {t('timer.work_break_duration')}
           </p>
         </div>
       </div>

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { useTasks, CustomTask } from '@/contexts/TasksContext'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 interface TaskFormProps {
   isOpen: boolean
@@ -9,24 +10,30 @@ interface TaskFormProps {
   editingTask?: CustomTask | null
 }
 
-const categories = [
-  'العمل',
-  'الصحة',
-  'التعليم',
-  'الأسرة',
-  'الهوايات',
-  'المهام الشخصية',
-  'أخرى'
-]
+const getCategoryKey = (category: string) => {
+  const categoryMap: { [key: string]: string } = {
+    'work': 'category.work',
+    'health': 'category.health', 
+    'education': 'category.education',
+    'family': 'category.family',
+    'hobbies': 'category.hobbies',
+    'personal': 'category.personal',
+    'other': 'category.other'
+  }
+  return categoryMap[category] || category
+}
+
+const categories = ['work', 'health', 'education', 'family', 'hobbies', 'personal', 'other']
 
 export default function TaskForm({ isOpen, onClose, editingTask }: TaskFormProps) {
   const { addTask, editTask } = useTasks()
+  const { t, dir } = useLanguage()
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     startTime: '',
     endTime: '',
-    category: 'المهام الشخصية'
+    category: 'personal'
   })
   const [error, setError] = useState('')
 
@@ -45,7 +52,7 @@ export default function TaskForm({ isOpen, onClose, editingTask }: TaskFormProps
         description: '',
         startTime: '',
         endTime: '',
-        category: 'المهام الشخصية'
+        category: 'personal'
       })
     }
     setError('')
@@ -56,17 +63,17 @@ export default function TaskForm({ isOpen, onClose, editingTask }: TaskFormProps
     setError('')
 
     if (!formData.title.trim()) {
-      setError('يرجى إدخال عنوان المهمة')
+      setError(t('task.validation.title_required'))
       return
     }
 
     if (!formData.startTime || !formData.endTime) {
-      setError('يرجى تحديد أوقات البداية والنهاية')
+      setError(t('task.validation.time_required'))
       return
     }
 
     if (formData.startTime >= formData.endTime) {
-      setError('وقت النهاية يجب أن يكون بعد وقت البداية')
+      setError(t('task.validation.time_order'))
       return
     }
 
@@ -87,7 +94,7 @@ export default function TaskForm({ isOpen, onClose, editingTask }: TaskFormProps
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-gray-800">
-              {editingTask ? 'تعديل المهمة' : 'إضافة مهمة جديدة'}
+              {editingTask ? t('task.edit_task') : t('task.add_new_task')}
             </h2>
             <button
               onClick={onClose}
@@ -100,7 +107,7 @@ export default function TaskForm({ isOpen, onClose, editingTask }: TaskFormProps
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
-                عنوان المهمة *
+                {t('task.form.title')} *
               </label>
               <input
                 type="text"
@@ -108,39 +115,39 @@ export default function TaskForm({ isOpen, onClose, editingTask }: TaskFormProps
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="أدخل عنوان المهمة"
-                dir="rtl"
+                placeholder={t('task.form.title_placeholder')}
+                dir={dir}
               />
             </div>
 
             <div>
               <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-                الوصف (اختياري)
+                {t('task.form.description')}
               </label>
               <textarea
                 id="description"
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent h-20"
-                placeholder="أدخل وصف المهمة"
-                dir="rtl"
+                placeholder={t('task.form.description_placeholder')}
+                dir={dir}
               />
             </div>
 
             <div>
               <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
-                الفئة
+                {t('task.form.category')}
               </label>
               <select
                 id="category"
                 value={formData.category}
                 onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                dir="rtl"
+                dir={dir}
               >
                 {categories.map(category => (
                   <option key={category} value={category}>
-                    {category}
+                    {t(getCategoryKey(category))}
                   </option>
                 ))}
               </select>
@@ -149,7 +156,7 @@ export default function TaskForm({ isOpen, onClose, editingTask }: TaskFormProps
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label htmlFor="startTime" className="block text-sm font-medium text-gray-700 mb-1">
-                  وقت البداية *
+                  {t('task.form.start_time')} *
                 </label>
                 <input
                   type="time"
@@ -162,7 +169,7 @@ export default function TaskForm({ isOpen, onClose, editingTask }: TaskFormProps
 
               <div>
                 <label htmlFor="endTime" className="block text-sm font-medium text-gray-700 mb-1">
-                  وقت النهاية *
+                  {t('task.form.end_time')} *
                 </label>
                 <input
                   type="time"
@@ -186,13 +193,13 @@ export default function TaskForm({ isOpen, onClose, editingTask }: TaskFormProps
                 onClick={onClose}
                 className="flex-1 px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
               >
-                إلغاء
+                {t('task.form.cancel')}
               </button>
               <button
                 type="submit"
                 className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
-                {editingTask ? 'حفظ التغييرات' : 'إضافة المهمة'}
+                {editingTask ? t('task.form.save_changes') : t('task.form.add_task')}
               </button>
             </div>
           </form>
