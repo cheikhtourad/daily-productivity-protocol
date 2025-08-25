@@ -63,6 +63,7 @@ export default function Home() {
     if (status !== 'loading') {
       loadProgress();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, status]);
 
   useEffect(() => {
