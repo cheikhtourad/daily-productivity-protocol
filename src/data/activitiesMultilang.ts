@@ -510,6 +510,32 @@ export const multilingualDailyActivities: MultilingualDailyActivities = {
   ]
 }
 
+// Helper function to determine category based on activity ID
+function getCategoryForActivity(activityId: string): 'spiritual' | 'work' | 'personal' | 'family' {
+  const categoryMap: { [key: string]: 'spiritual' | 'work' | 'personal' | 'family' } = {
+    'wake-hydrate': 'personal',
+    'morning-movement': 'personal',
+    'meditation-mindfulness': 'spiritual',
+    'personal-hygiene': 'personal',
+    'healthy-breakfast': 'personal',
+    'daily-planning': 'work',
+    'deep-work-1': 'work',
+    'active-break': 'personal',
+    'deep-work-2': 'work',
+    'review-communication': 'work',
+    'mindful-lunch': 'personal',
+    'power-nap-relaxation': 'personal',
+    'creative-tasks': 'work',
+    'collaboration-meetings': 'work',
+    'administrative-tasks': 'work',
+    'physical-exercise': 'personal',
+    'personal-development': 'personal',
+    'social-family': 'family',
+    'evening-reflection': 'spiritual'
+  };
+  return categoryMap[activityId] || 'personal';
+}
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export function getLocalizedActivities(language: Language): any {
   return {
@@ -520,7 +546,8 @@ export function getLocalizedActivities(language: Language): any {
         ...activity,
         title: activity.titles[language],
         description: activity.descriptions[language],
-        methodology: activity.methodologies[language]
+        methodology: activity.methodologies[language],
+        category: getCategoryForActivity(activity.id)
       }))
     }))
   }

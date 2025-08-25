@@ -12,16 +12,19 @@ interface ActivityCardProps {
 export default function ActivityCard({ activity, onToggleComplete }: ActivityCardProps) {
   const [showDetails, setShowDetails] = useState(false);
   const { t, language, dir } = useLanguage();
+  
+  // Determine category - use default if not available
+  const category = activity.category || 'personal';
 
   return (
     <div className={`p-4 rounded-lg border-2 transition-all duration-300 ${
       activity.completed 
         ? 'bg-gray-100 border-gray-300 opacity-70' 
-        : categoryColors[activity.category]
+        : categoryColors[category]
     }`}>
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-3 flex-1">
-          <span className="text-2xl">{categoryIcons[activity.category]}</span>
+          <span className="text-2xl">{categoryIcons[category]}</span>
           <div className="flex-1">
             <h3 className={`font-bold text-lg mb-1 text-black ${activity.completed ? 'line-through' : ''}`}>
               {(activity.title as unknown as Record<string, string>)[language] || activity.title}
@@ -57,31 +60,43 @@ export default function ActivityCard({ activity, onToggleComplete }: ActivityCar
 
       {showDetails && (
         <div className="mt-4 space-y-4 border-t pt-4">
-          {/* Processus */}
+          {/* Description */}
           <div>
             <h4 className="font-semibold text-md mb-2 text-black" style={{ textAlign: dir === 'rtl' ? 'right' : 'left' }}>📋 {t('activity.process')}</h4>
-            <ol className="space-y-2" style={{ textAlign: dir === 'rtl' ? 'right' : 'left' }} dir={dir}>
-              {((activity.processus as unknown as Record<string, string[]>)[language] || activity.processus).map((step: string, index: number) => (
-                <li key={index} className={`flex items-start gap-2 text-sm text-black ${dir === 'rtl' ? 'flex-row-reverse' : ''}`}>
-                  <span className="bg-blue-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs flex-shrink-0 mt-0.5">
-                    {index + 1}
-                  </span>
-                  <span className="flex-1">{step}</span>
-                </li>
-              ))}
-            </ol>
+            <div className="bg-white/70 p-3 rounded-md">
+              <p className="text-sm text-black" style={{ textAlign: dir === 'rtl' ? 'right' : 'left' }} dir={dir}>
+                {(activity as any).description || (activity as any).descriptions?.[language] || 'وصف النشاط غير متوفر'}
+              </p>
+            </div>
           </div>
 
           {/* Methodology */}
           <div>
             <h4 className="font-semibold text-md mb-2 text-black" style={{ textAlign: dir === 'rtl' ? 'right' : 'left' }}>⚡ {t('activity.methodology')}</h4>
             <div className="bg-white/70 p-3 rounded-md">
-              <p className="font-medium text-sm text-black mb-1" style={{ textAlign: dir === 'rtl' ? 'right' : 'left' }} dir={dir}>
-                {(activity.methodology.name as unknown as Record<string, string>)[language] || activity.methodology.name}
-              </p>
-              <p className="text-sm text-black" style={{ textAlign: dir === 'rtl' ? 'right' : 'left' }} dir={dir}>
-                {(activity.methodology.description as unknown as Record<string, string>)[language] || activity.methodology.description}
-              </p>
+              {((activity as any).methodology || (activity as any).methodologies?.[language]) && (
+                <div>
+                  {Array.isArray((activity as any).methodologies?.[language]) ? (
+                    <ul className="space-y-1" style={{ textAlign: dir === 'rtl' ? 'right' : 'left' }} dir={dir}>
+                      {(activity as any).methodologies[language].map((method: string, index: number) => (
+                        <li key={index} className="text-sm text-black flex items-start gap-2">
+                          <span className="text-blue-600">•</span>
+                          <span>{method}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <div>
+                      <p className="font-medium text-sm text-black mb-1" style={{ textAlign: dir === 'rtl' ? 'right' : 'left' }} dir={dir}>
+                        {(activity as any).methodology?.name || 'منهجية النشاط'}
+                      </p>
+                      <p className="text-sm text-black" style={{ textAlign: dir === 'rtl' ? 'right' : 'left' }} dir={dir}>
+                        {(activity as any).methodology?.description || 'وصف المنهجية غير متوفر'}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
