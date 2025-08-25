@@ -13,7 +13,7 @@ export default function Home() {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [currentActivity, setCurrentActivity] = useState<Activity | null>(null);
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [isLoading, setIsLoading] = useState(false);
+  const [, setIsLoading] = useState(false);
 
   // Load user progress from database or localStorage
   const loadProgress = async () => {
@@ -26,7 +26,7 @@ export default function Home() {
         const response = await fetch('/api/progress');
         if (response.ok) {
           const { progress } = await response.json();
-          const progressMap = progress.reduce((acc: Record<string, boolean>, item: any) => {
+          const progressMap = progress.reduce((acc: Record<string, boolean>, item: { activityId: string; completed: boolean }) => {
             acc[item.activityId] = item.completed;
             return acc;
           }, {});

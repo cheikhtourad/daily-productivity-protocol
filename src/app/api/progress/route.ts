@@ -4,7 +4,7 @@ import { authOptions } from '../auth/[...nextauth]/route';
 import { prisma } from '@/lib/prisma';
 
 // GET: Fetch user's progress for today
-export async function GET(request: NextRequest) {
+export async function GET() {
   const session = await getServerSession(authOptions);
   
   if (!session?.user?.id) {

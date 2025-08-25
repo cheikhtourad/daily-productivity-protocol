@@ -7,7 +7,7 @@ interface TimerProps {
   activityName?: string;
 }
 
-export default function Timer({ activityId, activityName }: TimerProps) {
+export default function Timer({ activityName }: TimerProps) {
   const [minutes, setMinutes] = useState(25);
   const [seconds, setSeconds] = useState(0);
   const [isActive, setIsActive] = useState(false);
