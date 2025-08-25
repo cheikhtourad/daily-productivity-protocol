@@ -1,70 +1,37 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
 import ActivityCard from '@/components/ActivityCard';
 import ProgressDashboard from '@/components/ProgressDashboard';
 import Timer from '@/components/Timer';
-import AuthButton from '@/components/AuthButton';
 import { dailyActivities, Activity } from '@/data/activities';
 
 export default function Home() {
-  const { data: session, status } = useSession();
   const [activities, setActivities] = useState<Activity[]>([]);
   const [currentActivity, setCurrentActivity] = useState<Activity | null>(null);
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [, setIsLoading] = useState(false);
 
-  // Load user progress from database or localStorage
-  const loadProgress = async () => {
+  // Load user progress from localStorage
+  const loadProgress = () => {
     const allActivities = dailyActivities.phases.flatMap(phase => phase.activities);
     
-    if (session?.user) {
-      // Authenticated user - load from database
-      try {
-        setIsLoading(true);
-        const response = await fetch('/api/progress');
-        if (response.ok) {
-          const { progress } = await response.json();
-          const progressMap = progress.reduce((acc: Record<string, boolean>, item: { activityId: string; completed: boolean }) => {
-            acc[item.activityId] = item.completed;
-            return acc;
-          }, {});
-          
-          const updatedActivities = allActivities.map(activity => ({
-            ...activity,
-            completed: progressMap[activity.id] || false
-          }));
-          setActivities(updatedActivities);
-        }
-      } catch (error) {
-        console.error('Error loading progress:', error);
-        setActivities(allActivities);
-      } finally {
-        setIsLoading(false);
-      }
+    // Guest user - load from localStorage
+    const savedProgress = localStorage.getItem('daily-progress');
+    if (savedProgress) {
+      const progress = JSON.parse(savedProgress);
+      const updatedActivities = allActivities.map(activity => ({
+        ...activity,
+        completed: progress[activity.id] || false
+      }));
+      setActivities(updatedActivities);
     } else {
-      // Guest user - load from localStorage
-      const savedProgress = localStorage.getItem('daily-progress');
-      if (savedProgress) {
-        const progress = JSON.parse(savedProgress);
-        const updatedActivities = allActivities.map(activity => ({
-          ...activity,
-          completed: progress[activity.id] || false
-        }));
-        setActivities(updatedActivities);
-      } else {
-        setActivities(allActivities);
-      }
+      setActivities(allActivities);
     }
   };
 
   useEffect(() => {
-    if (status !== 'loading') {
-      loadProgress();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session, status]);
+    loadProgress();
+  }, []);
 
   useEffect(() => {
     // Update current time every minute
@@ -94,13 +61,13 @@ export default function Home() {
     setCurrentActivity(current || null);
   }, [currentTime, activities]);
 
-  const handleToggleComplete = async (activityId: string) => {
+  const handleToggleComplete = (activityId: string) => {
     const activityToUpdate = activities.find(a => a.id === activityId);
     if (!activityToUpdate) return;
     
     const newCompleted = !activityToUpdate.completed;
     
-    // Optimistic update
+    // Update activities state
     const updatedActivities = activities.map(activity => 
       activity.id === activityId 
         ? { ...activity, completed: newCompleted }
@@ -108,49 +75,13 @@ export default function Home() {
     );
     setActivities(updatedActivities);
     
-    if (session?.user) {
-      // Authenticated user - save to database
-      try {
-        const response = await fetch('/api/progress', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            activityId,
-            completed: newCompleted,
-          }),
-        });
-        
-        if (!response.ok) {
-          // Revert optimistic update on error
-          const revertedActivities = activities.map(activity => 
-            activity.id === activityId 
-              ? { ...activity, completed: !newCompleted }
-              : activity
-          );
-          setActivities(revertedActivities);
-          console.error('Failed to update progress in database');
-        }
-      } catch (error) {
-        // Revert optimistic update on error
-        const revertedActivities = activities.map(activity => 
-          activity.id === activityId 
-            ? { ...activity, completed: !newCompleted }
-            : activity
-        );
-        setActivities(revertedActivities);
-        console.error('Error updating progress:', error);
-      }
-    } else {
-      // Guest user - save to localStorage
-      const progress = updatedActivities.reduce((acc, activity) => {
-        acc[activity.id] = activity.completed;
-        return acc;
-      }, {} as Record<string, boolean>);
-      
-      localStorage.setItem('daily-progress', JSON.stringify(progress));
-    }
+    // Save to localStorage
+    const progress = updatedActivities.reduce((acc, activity) => {
+      acc[activity.id] = activity.completed;
+      return acc;
+    }, {} as Record<string, boolean>);
+    
+    localStorage.setItem('daily-progress', JSON.stringify(progress));
   };
 
   const resetProgress = () => {
@@ -185,10 +116,7 @@ export default function Home() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Progress and Timer */}
           <div className="lg:col-span-1">
-            <AuthButton />
-            <div className="mt-6">
-              <ProgressDashboard activities={activities} />
-            </div>
+            <ProgressDashboard activities={activities} />
             <Timer 
               activityId={currentActivity?.id}
               activityName={currentActivity?.title}
