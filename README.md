@@ -1,36 +1,98 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 📋 البروتوكول اليومي - تطبيق الإنتاجية الشاملة
 
-## Getting Started
+## نظرة عامة
+تطبيق ويب شامل لإدارة البروتوكول اليومي مع منهجيات علمية مثبتة لكل نشاط. يساعدك على تنظيم يومك بطريقة منهجية دقيقة وقائمة على أفضل الممارسات.
 
-First, run the development server:
+## ✨ الميزات الرئيسية
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+### 🎯 إدارة الأنشطة
+- **ثلاث مراحل يومية**: الانطلاق والتهيئة، العمل والإنتاج، الأسرة والتطوير
+- **منهجيات علمية**: كل نشاط مرتبط بمنهجية إنتاجية مثبتة
+- **عمليات مفصلة**: خطوات واضحة لتنفيذ كل نشاط
+
+### 📊 تتبع التقدم
+- **لوحة تحكم تفاعلية**: عرض التقدم العام والتفصيلي
+- **إحصائيات بالفئات**: روحية، عمل، شخصية، أسرة
+- **رسائل تحفيزية**: تشجيع مستمر بناءً على الأداء
+- **حفظ تلقائي**: حفظ التقدم في المتصفح
+
+### ⏰ مؤقت بوموردو
+- **25 دقيقة عمل + 5 دقائق استراحة**
+- **تتبع الدورات المكتملة**
+- **إشعارات**: تنبيهات انتهاء الجلسات
+- **مرونة في الاستخدام**: إيقاف وإعادة تشغيل
+
+### 🌙 كشف النشاط الحالي
+- **تحديد تلقائي**: عرض النشاط الحالي حسب الوقت
+- **تذكير مرئي**: تمييز النشاط الجاري
+
+## 🚀 كيفية التشغيل
+
+### المتطلبات
+- Node.js (الإصدار 18 أو أحدث)
+- npm أو yarn
+
+### خطوات التشغيل
+
+1. **تثبيت المكتبات**
+   ```bash
+   npm install
+   ```
+
+2. **تشغيل الخادم المحلي**
+   ```bash
+   npm run dev
+   ```
+
+3. **فتح التطبيق**
+   افتح المتصفح على: `http://localhost:3000`
+
+## 📱 التقنيات المستخدمة
+
+- **Next.js 15** - إطار عمل React الحديث
+- **TypeScript** - للبرمجة الآمنة
+- **Tailwind CSS** - للتصميم المرن
+- **RTL Support** - دعم الكتابة من اليمين لليسار
+- **Local Storage** - لحفظ التقدم محلياً
+
+## 📚 منهجيات الإنتاجية المطبقة
+
+### 🌅 المرحلة الأولى: الانطلاق والتهيئة (05:00 – 08:45)
+
+1. **التهيئة الروحية والفكرية** - Morning Priming
+2. **صلاة الفجر والتحصيل القرآني** - Spaced Repetition + Active Recall
+3. **التمرين الرياضي** - HIIT + Compound Movements
+4. **وقت التنقل** - Dead Time to Learning Time
+
+### 💼 المرحلة الثانية: العمل والإنتاج (08:45 – 17:05)
+
+5. **استشارات الحوكمة الرقمية (GIZ)** - Inbox Zero + One Thing Focus
+6. **Next Technology (CTO)** - Agile Scrum – Daily Standup
+7. **صلاة الظهر والغداء + القيلولة** - Power Nap (NASA protocol)
+8. **DeepTech (استشارات ومشاريع)** - Document First – Iterate Fast
+9. **الأستاذ الجامعي / البحث العلمي** - Pomodoro Research Writing
+
+### 👨‍👩‍👧‍👦 المرحلة الثالثة: الأسرة والتطوير (17:50 – 22:30)
+
+10. **تعليم الأبناء** - Gamification + Protégé Effect
+11. **التطوير الذاتي** - Active Recall + Use It, Don't Study It
+12. **التخطيط السريع والمراجعة** - Zeigarnik Effect Shutdown
+
+## 🎨 التصميم والواجهة
+
+- **دعم RTL كامل**: مصمم خصيصاً للغة العربية
+- **خطوط عربية**: استخدام خط Noto Sans Arabic
+- **ألوان تفاعلية**: تمييز الفئات بألوان مختلفة
+- **تصميم متجاوب**: يعمل على جميع الأجهزة
+- **رموز تعبيرية**: لسهولة التعرف على الأنشطة
+
+## 🔧 التخصيص
+
+يمكنك تعديل الأنشطة والمواقيت من ملف:
+```
+src/data/activities.ts
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+**💡 تطبيق البروتوكول اليومي - نظام إنتاجية شامل مع منهجيات علمية مثبتة**
