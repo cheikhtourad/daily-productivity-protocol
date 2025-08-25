@@ -1,17 +1,5 @@
 {
-  "name": "daily-productivity-protocol",
   "version": 2,
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/next"
-    }
-  ],
-  "functions": {
-    "src/app/**/*.tsx": {
-      "runtime": "@vercel/node@18"
-    }
-  },
   "headers": [
     {
       "source": "/(.*)",
@@ -27,15 +15,6 @@
         {
           "key": "X-XSS-Protection",
           "value": "1; mode=block"
-        }
-      ]
-    },
-    {
-      "source": "/sw.js",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=0, must-revalidate"
         }
       ]
     }
