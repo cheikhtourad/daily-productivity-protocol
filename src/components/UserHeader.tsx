@@ -2,9 +2,12 @@
 
 import React from 'react'
 import { useAuth } from '@/contexts/AuthContext'
+import { useLanguage } from '@/contexts/LanguageContext'
+import LanguageSelector from './LanguageSelector'
 
 export default function UserHeader() {
   const { user, logout } = useAuth()
+  const { t } = useLanguage()
 
   if (!user) return null
 
@@ -17,19 +20,22 @@ export default function UserHeader() {
           </span>
         </div>
         <div>
-          <h3 className="font-medium text-gray-800">مرحباً، {user.username}</h3>
+          <h3 className="font-medium text-gray-800">{t('auth.welcome')}, {user.username}</h3>
           {user.email && (
             <p className="text-sm text-gray-500">{user.email}</p>
           )}
         </div>
       </div>
       
-      <button
-        onClick={logout}
-        className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
-      >
-        تسجيل الخروج
-      </button>
+      <div className="flex items-center space-x-3">
+        <LanguageSelector />
+        <button
+          onClick={logout}
+          className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+        >
+          {t('auth.logout')}
+        </button>
+      </div>
     </div>
   )
 }
