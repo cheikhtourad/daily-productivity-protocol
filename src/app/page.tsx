@@ -1,37 +1,47 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import ActivityCard from '@/components/ActivityCard';
 import ProgressDashboard from '@/components/ProgressDashboard';
 import Timer from '@/components/Timer';
+import AuthForm from '@/components/AuthForm';
+import UserHeader from '@/components/UserHeader';
+import { useAuth } from '@/contexts/AuthContext';
 import { dailyActivities, Activity } from '@/data/activities';
 
 export default function Home() {
+  const { user, isLoading } = useAuth();
   const [activities, setActivities] = useState<Activity[]>([]);
   const [currentActivity, setCurrentActivity] = useState<Activity | null>(null);
   const [currentTime, setCurrentTime] = useState(new Date());
 
   // Load user progress from localStorage
-  const loadProgress = () => {
+  const loadProgress = useCallback(() => {
     const allActivities = dailyActivities.phases.flatMap(phase => phase.activities);
     
-    // Guest user - load from localStorage
-    const savedProgress = localStorage.getItem('daily-progress');
-    if (savedProgress) {
-      const progress = JSON.parse(savedProgress);
-      const updatedActivities = allActivities.map(activity => ({
-        ...activity,
-        completed: progress[activity.id] || false
-      }));
-      setActivities(updatedActivities);
+    if (user) {
+      // Authenticated user - load user-specific progress
+      const savedProgress = localStorage.getItem(`daily-progress-${user.username}`);
+      if (savedProgress) {
+        const progress = JSON.parse(savedProgress);
+        const updatedActivities = allActivities.map(activity => ({
+          ...activity,
+          completed: progress[activity.id] || false
+        }));
+        setActivities(updatedActivities);
+      } else {
+        setActivities(allActivities);
+      }
     } else {
       setActivities(allActivities);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
-    loadProgress();
-  }, []);
+    if (!isLoading) {
+      loadProgress();
+    }
+  }, [user, isLoading, loadProgress]);
 
   useEffect(() => {
     // Update current time every minute
@@ -75,24 +85,46 @@ export default function Home() {
     );
     setActivities(updatedActivities);
     
-    // Save to localStorage
+    // Save to localStorage with user-specific key
     const progress = updatedActivities.reduce((acc, activity) => {
       acc[activity.id] = activity.completed;
       return acc;
     }, {} as Record<string, boolean>);
     
-    localStorage.setItem('daily-progress', JSON.stringify(progress));
+    if (user) {
+      localStorage.setItem(`daily-progress-${user.username}`, JSON.stringify(progress));
+    }
   };
 
   const resetProgress = () => {
     const resetActivities = activities.map(activity => ({ ...activity, completed: false }));
     setActivities(resetActivities);
-    localStorage.removeItem('daily-progress');
+    if (user) {
+      localStorage.removeItem(`daily-progress-${user.username}`);
+    }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">جاري التحميل...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <AuthForm />;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 p-4 md:p-8" dir="rtl">
       <div className="max-w-6xl mx-auto">
+        {/* User Header */}
+        <UserHeader />
+        
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
